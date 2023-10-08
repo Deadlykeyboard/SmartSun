@@ -2,16 +2,17 @@ import math
 import datetime
 
 class SmartSunPos():
-	def __init__(self, return_time: bool = False, location: tuple = (0.0, 0.0), timezone: int = 0, refraction: bool = True):
+	def __init__(self, return_time: bool = True, location: tuple = (0.0, 0.0), timezone: int = 0, refraction: bool = True):
 		tz, location, refraction = self.get_user_details(timezone, location, refraction)
 		current_time = self.current_time(timezone)
 		self.sun_position = self.sunpos(current_time, location, refraction, return_time)
 
 	def get_user_details(self, tz, location, refraction):
-		if tz != 0:
-			pass
+		# Loads standards for the netherlands
+		if tz == 0:
+			tz == 2
 		if location == 0:
-			location ==  (52.09061, 5.12143)
+			location ==  (52.1, 5.1)
 		return tz, location, refraction
 
 	def current_time(self, tz):
