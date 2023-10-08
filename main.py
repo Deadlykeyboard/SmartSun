@@ -1,15 +1,16 @@
 ## Written by Deadlykeyboard
 import time
-import os
-
 print("FETCHING DATA...")
 
 for i in range(10):
     if i == 1:
         from SmartSunPos import SmartSunPos
-    if i != 1:
+    if i == 2:    
+        import os
+    if i not in [1, 2]:
         time.sleep(.1)
-        # later loading here under more 'ifs' for now sleep.
+    
+    # later loading here under more 'ifs' for now sleep.
     print(f"[LOADING] {'##' * i}\033[1A")
 
 print()
