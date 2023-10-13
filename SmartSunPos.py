@@ -2,9 +2,12 @@ import math
 import datetime
 
 class SmartSunPos():
-	def __init__(self, return_time: bool = True, location: tuple = (0.0, 0.0), timezone: int = 0, refraction: bool = True):
+	def __init__(self, use_system_time: bool = True, man_time: tuple = (0, 0, 0, 0, 0, 0, 0), return_time: bool = True, location: tuple = (0.0, 0.0), timezone: int = 0, refraction: bool = True):
 		tz, location, refraction = self.get_user_details(timezone, location, refraction)
-		current_time = self.current_time(timezone)
+		if use_system_time == True:
+			current_time = self.current_time(timezone)
+		else:
+			current_time = man_time
 		self.sun_position = self.sunpos(current_time, location, refraction, return_time)
 
 	def get_user_details(self, tz, location, refraction):
