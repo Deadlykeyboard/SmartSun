@@ -3,29 +3,37 @@ import datetime
 
 class SmartSunPos():
 	def __init__(self, use_system_time: bool = True, man_time: tuple = (0, 0, 0, 0, 0, 0, 0), return_time: bool = True, location: tuple = (0.0, 0.0), timezone: int = 0, refraction: bool = True):
-		tz, location, refraction = self.get_user_details(timezone, location, refraction)
-		if use_system_time == True:
-			current_time = self.current_time(timezone)
-		else:
-			current_time = man_time
-		self.sun_position = self.sunpos(current_time, location, refraction, return_time)
-
-	def get_user_details(self, tz, location, refraction):
+		self.tz			 = tz
+		self.location	 = location
+		self.refraction	 = refaction
+		self.return_time = return_time
+		
+		if use_system_time == True: self.current_time = self.current_time(timezone)
+		else: self.current_time = man_time
+		
 		# Loads standards for the netherlands
-		if tz == 0:
-			tz == 2
-		if location == 0:
-			location ==  (52.1, 5.1)
-		return tz, location, refraction
+		if tz == 0: self.tz == 2
+		else: self.tz = tz
+		if location == 0: location ==  (52.1, 5.1)
+			
+		self.sun_position = self.sunpos()
 
-	def current_time(self, tz):
+	def get_user_details(self):
+		"""returns the saved details
+		args: None
+  		returns: dict of the specified timezone, location and refraction"""
+		return {'tz': tz, 'location': location, 'refraction': refraction}
+		
+
+	def current_time(self, tz=None):
+		if !tz: tz = self.tz
 		curr_time = datetime.datetime.today().timetuple()
 		year, mon, day, hr, mins, secs = curr_time.tm_year, curr_time.tm_mon, curr_time.tm_mday, curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec
 		time_zone = tz
 		return (year, mon, day, hr, mins, secs, time_zone)
 
 	
-	def sunpos(self, when, location, refraction, return_time):
+	def sunpos(self, when=self.current_time, location=self.location, refraction=self.refraction, return_time=self.return_time):
 		def into_range(x, range_min, range_max):
 			shiftedx = x - range_min
 			delta = range_max - range_min
