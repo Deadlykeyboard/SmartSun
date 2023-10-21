@@ -20,11 +20,11 @@ if __name__ == "__main__":
     timezone = 2
     while True:
         termsize = os.get_terminal_size().columns
-        obj = SmartSunPos(return_time=True, location=location, timezone=timezone, refraction=True)
+        obj = SmartSunPos(use_system_time=True, return_time=True, location=location, timezone=timezone, refraction=True)
         #obj = SmartSunPos()
         azimuth, elevation, time_of_measurement = obj.sun_position
         print("-" * termsize)
-        print(f"Last measurement: {time_of_measurement}")
+        print(f"Last measurement: {obj.data}")
         print(f"Current azimuth: {azimuth} degrees\nCurrent elevation: {elevation} degrees")
         print("-" * termsize)
         print("\033[6A")

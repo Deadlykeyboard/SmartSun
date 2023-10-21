@@ -2,21 +2,26 @@ import math
 import datetime
 
 class SmartSunPos():
-	def __init__(self, use_system_time: bool = True, man_time: tuple = (0, 0, 0, 0, 0, 0, 0), return_time: bool = True, location: tuple = (0.0, 0.0), timezone: int = 0, refraction: bool = True):
-		tz, location, refraction = self.get_user_details(timezone, location, refraction)
+	def __init__(self, use_system_time: bool = True, man_time: tuple = (0, 0, 0, 0, 0, 0, 0), return_time: bool = True, location: tuple = None, timezone: int = None, refraction: bool = True):
+		tz, location = self.set_default(timezone, location)
 		if use_system_time == True:
 			current_time = self.current_time(timezone)
 		else:
 			current_time = man_time
+		self.data = self.get_data(current_time, location, tz, refraction)
 		self.sun_position = self.sunpos(current_time, location, refraction, return_time)
 
-	def get_user_details(self, tz, location, refraction):
+	def set_default(self, tz, location):
+		# If the user did not manipulate any data, the deafault (NE) will be set.
 		# Loads standards for the netherlands
-		if tz == 0:
-			tz == 2
-		if location == 0:
-			location ==  (52.1, 5.1)
-		return tz, location, refraction
+		if tz == None: tz == 2
+		if location == None: location ==  (52.1, 5.1)
+		return tz, location
+
+
+	def get_data(self, current_time, location, tz, refraction):
+		return {'refraction':refraction, 'current_time':current_time, 'location':location, 'timezone':tz, }
+
 
 	def current_time(self, tz):
 		curr_time = datetime.datetime.today().timetuple()
