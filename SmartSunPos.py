@@ -18,7 +18,6 @@ class SmartSunPos():
 		if location == None: location ==  (52.1, 5.1)
 		return tz, location
 
-
 	def get_data(self, current_time, location, tz, refraction):
 		return {'refraction':refraction, 'current_time':current_time, 'location':location, 'timezone':tz, }
 
