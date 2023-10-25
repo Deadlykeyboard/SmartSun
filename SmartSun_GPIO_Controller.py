@@ -51,8 +51,7 @@ class stepper_controller():
             
 
     def return_default(self):
-        while self._step != 0:
-            self._make_step('ccw')
+        self.goto_specified(0)
 
     def goto_specified(self, angle):
         if self._which == 'STY': domain = [0, 90]
