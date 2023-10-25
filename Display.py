@@ -79,11 +79,14 @@ class display_controller():
         for i in range(self._LCD_WIDTH):
             self.lcd_byte(ord(message[i]),self._LCD_CHR)
 
-    def cdprint(self, msg: str, cline: int):
+    def cdprint(self, msg: str, cline: int, center: bool = True):
+        if center:
+            msg = self.center_string(msg)
+
         if cline == 1:
-            self.lcd_string(self.center_string(msg), self._LCD_LINE_1)
+            self.lcd_string(msg, self._LCD_LINE_1)
         elif cline == 2:
-            self.lcd_string(self.center_string(msg), self._LCD_LINE_2)
+            self.lcd_string(msg, self._LCD_LINE_2)
         else:
             print('No valid CLINE value.')
 

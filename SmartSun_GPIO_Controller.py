@@ -52,31 +52,55 @@ class stepper_controller():
 
     def return_default(self):
         while self._step != 0:
-            self._make_step('cww')
+            self._make_step('ccw')
 
     def goto_specified(self, angle):
-        '''
-        TODO: Stepper ccw, na middendag.
-        TODO: Select by smallest route.
-        progress bar stepper??
-        '''
-        
         if self._which == 'STY': domain = [0, 90]
         elif self._which == 'STX': domain = [0, 360]
 
-        current_angle = self.get_angle()
-        print(f"""INCOMMING DATA:
-Selected_stepper: {self._which}
-Requested_angle: {angle}
-Current_angle: {self.get_angle()}
-Requested_steps: {self.get_step(angle) - self._step}""")
+        def get_closest_dir(angle):
+            current_step = self._step
+            goto_step = self.get_step(angle)
+            a = int(goto_step - current_step)
+            b = int(4096 - (goto_step - current_step))
+            if a < b:
+                return 'cw'
+            else:
+                return 'ccw'
 
         try:
             if ((domain[0] <= angle) and (angle <= domain[1])):
-                requested_steps = self.get_step(angle) - self._step
+                goto_step = self.get_step(angle)
+                requested_steps_cw = int(goto_step - self._step)           
+                requested_steps_ccw = int(4096 - (goto_step - self._step))
                 
-                for _ in range(requested_steps):
-                    self._make_step('cw')
+                dir = get_closest_dir(angle)
+
+                if requested_steps_cw < 0:
+                    requested_steps = int(-1 * requested_steps_cw)
+                    dir = 'ccw'
+                    print('--Step NEG-CW--')
+                elif requested_steps_ccw < 0:
+                    requested_steps = int(-1 * requested_steps_ccw)
+                    dir = 'cw'
+                    print('--Step NEG-CCW--')
+                else: 
+                    if dir == 'cw': requested_steps = requested_steps_cw; print('--Step CW--')
+                    else: requested_steps = requested_steps_ccw; print('--Step CCW--')
+                
+
+                print(f"""INCOMMING DATA:
+Selected_stepper: {self._which}
+Requested_angle: {angle}
+Requested_direction: {dir}
+Current_angle: {self.get_angle()}
+Requested_steps: {requested_steps}\n""")
+                
+                for i in range(requested_steps):
+                    self._make_step(dir)
+
+                    if i % 10 == 0:
+                        ... 
 
             else:
                 raise StepperDomainError("StepperDomainError: The value specified is not in the domain supported by this machine.")
@@ -90,7 +114,6 @@ Requested_steps: {self.get_step(angle) - self._step}""")
 
     def get_angle(self) -> float:
         return (360/self._steps) * self._step # calculate angle
-
 
     def _make_step(self, dir: str = 'cw') -> bool:
         def check_domain():
