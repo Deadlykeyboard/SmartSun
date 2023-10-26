@@ -1,14 +1,19 @@
+# NTDEV - ID: 012
+# VERSION: ALPHA 1.0
+
+# Imports
 import sys
 import time
 import RPi.GPIO as GPIO
 
+# Exceptions
 class StepperDomainError(Exception):
     pass
 
 class StepperExecutionError(Exception):
     pass
 
-
+# Class
 class stepper_controller():
     def __init__(self, pins: tuple[int, int, int, int], steps: int = 4096, which: str = None):
         self._which = which # STX/STY
@@ -61,7 +66,7 @@ class stepper_controller():
             current_step = self._step
             goto_step = self.get_step(angle)
             a = int(goto_step - current_step)
-            b = int(4096 - (goto_step - current_step))
+            b = int(self._steps - (goto_step - current_step))
             if a < b:
                 return 'cw'
             else:
@@ -71,7 +76,7 @@ class stepper_controller():
             if ((domain[0] <= angle) and (angle <= domain[1])):
                 goto_step = self.get_step(angle)
                 requested_steps_cw = int(goto_step - self._step)           
-                requested_steps_ccw = int(4096 - (goto_step - self._step))
+                requested_steps_ccw = int(self._steps - (goto_step - self._step))
                 
                 dir = get_closest_dir(angle)
 
@@ -103,9 +108,11 @@ Requested_steps: {requested_steps}\n""")
 
             else:
                 raise StepperDomainError("StepperDomainError: The value specified is not in the domain supported by this machine.")
+                exit()
         
         except StepperExecutionError as e:
             print("StepperExecutionError: The has been some trouble processing the given data.")
+            exit()
 
 
     def get_step(self, angle: float) -> int:
@@ -116,8 +123,8 @@ Requested_steps: {requested_steps}\n""")
 
     def _make_step(self, dir: str = 'cw') -> bool:
         def check_domain():
-            if self._step > 4095: self._step = 0
-            elif self._step < 0: self._step = 4095
+            if self._step > (self._steps - 1): self._step = 0
+            elif self._step < 0: self._step = (self._steps - 1)
 
         try:
             check_domain()
@@ -135,11 +142,6 @@ Requested_steps: {requested_steps}\n""")
 
             return True
 
-        except:
-            return False
+        except StepperExecutionError as e:
+            print("StepperExecutionError: The has been some trouble processing the given data.")
             exit()
-
-
-# x_stepper = stepper_controller(pins=PINS_X_STEPPER, steps=4096)
-# y_stepper = stepper_controller(pins=PINS_Y_STEPPER, steps=4096)
-

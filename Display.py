@@ -1,6 +1,11 @@
+# NTDEV - ID: 012
+# VERSION: ALPHA 1.0
+
+# Imports
 import smbus
 import time
 
+# Class
 class display_controller():
     def __init__(self):
         self._I2C_ADDR = 0x27

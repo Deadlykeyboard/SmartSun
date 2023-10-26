@@ -1,3 +1,6 @@
+# NTDEV - ID: 012
+# VERSION: ALPHA 1.0
+
 ***SMARTSUN***
 Schrijvers_PWS: Coert de Bruin en Nathan verburg
 Schrijvers  -SmartSunPos
@@ -27,21 +30,6 @@ Schrijvers  -SmartSunPos
         
         &ClassFuctions:
          
-        
-                    
-    
-
-
-
-    DISCLAIMER:
-        Bij het gebruik van deze software gaat u akkoord met onze voorwaarden:
-            -Wij zijn niet verantwoordelijk voor de dood van je kat
-            -Wij zijn niet verantwoordelijk voor het spontane verdwijnen van jouw huis door middel van vuur
-            -Wij zijn niet verantwoordelijk voor de persoon die likt aan de stroomdraden
-            -Koop een rolstoel
-
-            
-
 
 
 The GNU General Public License is a free, copyleft license for software and other kinds of works.

@@ -1,6 +1,11 @@
+# NTDEV - ID: 012
+# VERSION: ALPHA 1.0
+
+# Imports
 import math
 import datetime
 
+# Class
 class SmartSunPos():
 	def __init__(self, use_system_time: bool = True, man_time: tuple = (0, 0, 0, 0, 0, 0, 0), return_time: bool = True, location: tuple = None, timezone: int = None, refraction: bool = True):
 		tz, location = self.set_default(timezone, location)
