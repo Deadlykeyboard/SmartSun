@@ -1,5 +1,5 @@
 # NTDEV - ID: 012
-# VERSION: ALPHA 1.0
+# VERSION: ALPHA 0.1
 
 # Imports
 import smbus
@@ -97,6 +97,7 @@ class display_controller():
 
 
     def dprint(self, msg: str):
+        self.lcd_byte(0x01, self._LCD_CMD)
         dsp_list = list(msg)
         line_1 = []
         line_2 = []
@@ -118,6 +119,3 @@ class display_controller():
 
         else:
             print("Woh, that's to much to the good.")
-
-
-

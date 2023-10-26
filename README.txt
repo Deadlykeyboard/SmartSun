@@ -1,36 +1,7 @@
 # NTDEV - ID: 012
 # VERSION: ALPHA 1.0
 
-***SMARTSUN***
-Schrijvers_PWS: Coert de Bruin en Nathan verburg
-Schrijvers  -SmartSunPos
-            -SmartSun_GPIO_Controller
-            -Main
-            -Display 
-            ---> Niek van Reenen en Timo Oosterom
-
-
-
-**Uitleg per Class/Bestand**
-    *SmartSunPos*
-        &ClassVariables:
-            -use_system_time = bool // als True -> er wordt gebruik gemaakt vn de systeemtijd
-            -man_time = tuple       // als use_system_time = False -> tuple met tijd benodigd == (Year, Month, Day, Hour, Minute, Second, Timezone) # Timezone zal niet gebruikt worden.
-            -return_time = bool     // als True -> tuple met de tijd van meting wordt teruggestuurd.
-            -location = tuple       // tuple met locatie = (0, 0)
-            -timezone = int         // timezone als heel cijfer -> bijv. 2
-            -refraction = bool      // houdt rekening met refraction = True
-        &ClassFuctions:
-            -Maken niet echt uit
-        Rekent de stand van de zon uit in azimuth en elevation, ofterwijl de 'richting', en de 'hoogtehoek'.
-
-    *display_controller*
-        &ClassVariables:
-            None
-        
-        &ClassFuctions:
-         
-
+This software is released under GNU V3.
 
 The GNU General Public License is a free, copyleft license for software and other kinds of works.
 
@@ -49,3 +20,10 @@ For the developers' and authors' protection, the GPL clearly explains that there
 Some devices are designed to deny users access to install or run modified versions of the software inside them, although the manufacturer can do so. This is fundamentally incompatible with the aim of protecting users' freedom to change the software. The systematic pattern of such abuse occurs in the area of products for individuals to use, which is precisely where it is most unacceptable. Therefore, we have designed this version of the GPL to prohibit the practice for those products. If such problems arise substantially in other domains, we stand ready to extend this provision to those domains in future versions of the GPL, as needed to protect the freedom of users.
 
 Finally, every program is threatened constantly by software patents. States should not allow patents to restrict development and use of software on general-purpose computers, but in those that do, we wish to avoid the special danger that patents applied to a free program could make it effectively proprietary. To prevent this, the GPL assures that patents cannot be used to render the program non-free.
+
+
+
+Error Reference Table:
+    1. An error has occured while returning or after returning for sleep mode.
+    2. An error has occured with the stepper for azimuth - outside domain.
+    3. An error has occured with the stepper for elevation - outside domain.
