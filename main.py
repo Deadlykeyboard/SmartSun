@@ -12,6 +12,7 @@ PINS_X_STEPPER = (17, 27, 22, 23)
 PINS_Y_STEPPER = (24, 5, 6, 16)
 
 _version_ = 'BETA V0.1'
+_ntdev-id_ = '012'
 disp = display_controller()
 
 parser = argparse.ArgumentParser()
@@ -25,15 +26,16 @@ if not args.cron:
 
 # Boot screen
 disp.cdprint("PWS - STARTUP", cline=1)
-disp.cdprint(str(base64.b64decode('KEMpIE5pZWssIFRpbW8='))[2:-1], cline=2)
-time.sleep(1)
-disp.cdprint(_version_, cline=2)
-time.sleep(3)
 for i in range(17):
     disp.cdprint(i * '#', cline=2, center=False)
     time.sleep(.1)
+time.sleep(3)
+disp.cdprint(str(base64.b64decode('KEMpIE5pZWssIFRpbW8='))[2:-1], cline=2)
+time.sleep(1)
+disp.cdprint(f'ntdev id: {_ntdev-id_}', cline=2)
+time.sleep(1)
+disp.cdprint(_version_, cline=2)
 time.sleep(2)
-
 
 # Locale settings
 location = (52.09061, 5.12143)
