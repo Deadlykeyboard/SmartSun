@@ -1,5 +1,5 @@
 # NTDEV - ID: 012
-# VERSION: ALPHA 1.0
+# VERSION: ALPHA 0.1
 
 This software is released under GNU V3.
 
