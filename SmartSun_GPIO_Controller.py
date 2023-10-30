@@ -100,11 +100,8 @@ Requested_direction: {dir}
 Current_angle: {self.get_angle()}
 Requested_steps: {requested_steps}\n""")
                 
-                for i in range(requested_steps):
+                for _ in range(requested_steps):
                     self._make_step(dir)
-
-                    if i % 10 == 0:
-                        ... 
 
             else:
                 raise StepperDomainError("StepperDomainError: The value specified is not in the domain supported by this machine.")
@@ -121,7 +118,7 @@ Requested_steps: {requested_steps}\n""")
     def get_angle(self) -> float:
         return (360/self._steps) * self._step # calculate angle
 
-    def _make_step(self, dir: str = 'cw') -> bool:
+    def _make_step(self, dir: str) -> bool:
         def check_domain():
             if self._step > (self._steps - 1): self._step = 0
             elif self._step < 0: self._step = (self._steps - 1)

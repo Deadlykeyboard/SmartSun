@@ -55,7 +55,6 @@ class display_controller():
             function = supported_commands[command]
             function(self)
 
-
         else:
             print("UNSUPPORTED COMMAND")
             

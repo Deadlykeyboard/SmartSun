@@ -118,11 +118,14 @@ def update_steppers(x_angle: float, y_angle: float) -> bool:
             time.sleep(2)
             pass
 
+_man_time = (2023, 0, 0, 0, 0, 0, 0)
+_sys_time = True
+
 # Mainloop
 while True:
     try:
-        # in call ssp: man_time=(y, m, d, o, m, s, timezone)
-        obj = SmartSunPos(use_system_time=True, return_time=True, location=location, timezone=timezone, refraction=True)
+        # in call ssp: man_time=(y, m, d, h, m, s, timezone)       
+        obj = SmartSunPos(use_system_time=_sys_time, man_time=_man_time, return_time=True, location=location, timezone=timezone, refraction=True)
         azimuth, elevation, time_of_measurement = obj.sun_position
             
         #---DESKTOP---#
