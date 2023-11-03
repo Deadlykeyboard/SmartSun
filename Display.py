@@ -7,7 +7,7 @@ import time
 
 # Class
 class display_controller():
-    def __init__(self):
+    def __init__(self, smbus_ver: int = 1):
         self._I2C_ADDR = 0x27
         self._LCD_WIDTH = 16
         self._LCD_CHR = 1 # send data
@@ -19,7 +19,7 @@ class display_controller():
         self._E_PULSE = 0.0005
         self._E_DELAY = 0.0005
         self._LCD_CLEAR = 0x01
-        self._bus = smbus.SMBus(1) # Old ones = 1
+        self._bus = smbus.SMBus(smbus_ver) # Old ones = 0
         self.lcd_init()
 
     def turn_off(self):
