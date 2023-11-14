@@ -1,12 +1,13 @@
+# NTDEV - ID: 012
+# VERSION: ALPHA 0.1
+
 import socket
 import time
 import struct
-import rpi.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 class EthernetInfo():
-    def __init__(self, timeserver: str = "pool.ntp.org"):
-        self.timeserver = timeserver
-        self.currenttime = self._getInternetTime()
+    def __init__(self):
         self.MyIP = self._getMyIp()
 
     def CheckInternetAvailability(self) -> bool:
@@ -23,15 +24,20 @@ class EthernetInfo():
         local_ip_address = socket_instance.getsockname()[0]
         socket_instance.close
         return local_ip_address
-    
-    def _getInternetTime(self) -> tuple:
-        timesrv = self.timeserver
-        def getTimeFromServer(timesrv):
+
+
+
+class NTPtime():
+    def __init__(self, timeserver: str = "pool.ntp.org"):
+        self._timeserver = timeserver
+        self.CurrentFormattedTime = self._FormattedNTPTime()
+        
+    def getTimeFromServer(self):
             client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             client.settimeout(5)
         
             try:
-                serveraddress = socket.gethostbyname(timesrv)
+                serveraddress = socket.gethostbyname(self._timeserver)
                 ntp_req = bytearray(48)
                 ntp_req[0] = 0x1B
 
@@ -47,7 +53,10 @@ class EthernetInfo():
             finally:
                 client.close()
         
-        time_struct = time.localtime(getTimeFromServer(timesrv=timesrv))
+
+
+    def _FormattedNTPTime(self) -> tuple:
+        time_struct = time.localtime(self.getTimeFromServer())
         year, month, day, hour, minute, second = time_struct[:6]
 
         dst_in_effect = True if time_struct.tm_isdst == 0 else False
@@ -56,35 +65,3 @@ class EthernetInfo():
         timezone_sign = '-' if timezone_offset > 0 else '+'
 
         return year, month, day, hour, minute, second, int(f"{timezone_sign}{timezone_hours:02}")
-
-
-class LightController():
-    def __init__(self, pin):
-        self._pin = pin
-        self._GPIO_setup()
-    
-    def GPIO_clearout(self) -> None:
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self._pin, GPIO.IN)
-        GPIO.setup(self._pin, GPIO.LOW)
-        GPIO.cleanup()
-    
-    def _GPIO_setup(self) -> None:
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setwarnings(False)
-        GPIO.setup (self._pin, GPIO.OUT)
-        GPIO.output(self._pin, GPIO.LOW)
-    
-    def blink(self):
-        while True:
-            GPIO.output(self._pin, GPIO.HIGH)
-            time.sleep(1)
-            GPIO.output(self._pin, GPIO.LOW)
-    
-    def turn_on(self):
-        GPIO.output(self._pin, GPIO.HIGH)
-    
-    def turn_off(self):
-        GPIO.output(self._pin, GPIO.LOW)
-
-            

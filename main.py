@@ -8,7 +8,8 @@ import time
 import argparse
 import threading
 
-from Misc import LightController
+from LightController import LightController
+from Misc import NTPtime
 from Misc import EthernetInfo
 from Display import display_controller
 from SmartSunPos import SmartSunPos
@@ -25,6 +26,7 @@ _termsize_ = 0
 x_stepper = stepper_controller(PINS_X_STEPPER, which='STX')
 y_stepper = stepper_controller(PINS_Y_STEPPER, which='STY')
 
+ntptime = NTPtime()
 ether = EthernetInfo()
 disp = display_controller()
 buzz = buzzer_controller(pin=BUZZER_PIN)
@@ -46,6 +48,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--terminal", '-t', help="Starts program in terminal mode", action='store_true')
 parser.add_argument("--cron", '-c', help="Starts program in cron mode", action='store_true')
 parser.add_argument("--silent", '-s', help="Starts program in silent mode", action='store_true')
+parser.add_argument("--fast", '-f', help="Starts in fast-start mode", action='store_true')
 args = parser.parse_args()
 
 if args.silent:
@@ -56,22 +59,24 @@ if not args.cron:
 
 # Boot screen
 disp.cdprint("PWS - STARTUP", cline=1)
-for i in range(17):
-    disp.cdprint(i * '#', cline=2, center=False)
-    buzz.single_beep()
 
-time.sleep(3)
-disp.cdprint(str(base64.b64decode('KEMpIE5pZWssIFRpbW8='))[2:-1], cline=2); time.sleep(1.5)
-disp.cdprint(f'NTdev id: {_ntdevid_}', cline=2); time.sleep(1.5)
-disp.cdprint(f'Ver: {_version_}', cline=2); time.sleep(1.5)
-disp.cdprint(f'Device: {_device_}', cline=2); time.sleep(1.5)
-disp.cdprint(f'Unit: {_unit_}', cline=2); time.sleep(1.5)
-disp.cdprint(f'IP: {_ip_}', cline=2); time.sleep(1.5)
+if not args.fast:
+    for i in range(17):
+        disp.cdprint(i * '#', cline=2, center=False)
+        buzz.single_beep()
 
-buzz.continuous_buzz(True)
-if not args.silent: time.sleep(2)
-buzz.continuous_buzz(False)
-if not args.silent: time.sleep(.5)
+    time.sleep(3)
+    disp.cdprint(str(base64.b64decode('KEMpIE5pZWssIFRpbW8='))[2:-1], cline=2); time.sleep(1.5)
+    disp.cdprint(f'NTdev id: {_ntdevid_}', cline=2); time.sleep(1.5)
+    disp.cdprint(f'Ver: {_version_}', cline=2); time.sleep(1.5)
+    disp.cdprint(f'Device: {_device_}', cline=2); time.sleep(1.5)
+    disp.cdprint(f'Unit: {_unit_}', cline=2); time.sleep(1.5)
+    disp.cdprint(f'IP:{_ip_}', cline=2); time.sleep(1.5)
+
+    buzz.continuous_buzz(True)
+    if not args.silent: time.sleep(2)
+    buzz.continuous_buzz(False)
+    if not args.silent: time.sleep(.5)
 buzz.single_beep()
 
 if not ether.CheckInternetAvailability():
@@ -81,15 +86,17 @@ if not ether.CheckInternetAvailability():
     exit()
 
 
-error_blink = threading.Thread(target=error_light.blink())
-error_beep = threading.Thread(target=buzz.error_beep())
+error_blink = threading.Thread(target=error_light.blink)
+error_beep = threading.Thread(target=buzz.error_beep)
 def physical_error(state: bool):
     if state:
         error_blink.start()
         error_beep.start()
+        return
     else:
         error_blink.join()
         error_beep.join()
+        return
     
 
 # Stepper system
@@ -130,6 +137,7 @@ def update_steppers(x_angle: float, y_angle: float) -> bool:
     else:
         try:
             buzz.beep_nonstop(5)
+            error_light.turn_on()
             disp.cdprint("Sun's under...", cline=1)
             disp.cdprint("Retmsg 2 stepper", cline=2); time.sleep(1)
             x_stepper.return_default()
@@ -143,11 +151,11 @@ def update_steppers(x_angle: float, y_angle: float) -> bool:
             time.sleep(2)
             pass
 
-_sys_time = False # System time not set correctly.
+_sys_time = False # System time often not set correctly.
+
 # Mainloop
 while True:
-    physical_error(False)
-    _time_by_ntp_ = ether.currenttime
+    _time_by_ntp_ = ntptime.CurrentFormattedTime
     _man_time = _time_by_ntp_ #(2023, 0, 0, 0, 0, 0, 0)
     
     try:
@@ -177,7 +185,8 @@ while True:
 
         disp.turn_off()
         buzz.GPIO_clearout()
-
+        light.GPIO_clearout()
+        
         x_stepper.GPIO_clearout()
         y_stepper.GPIO_clearout()
         exit()
