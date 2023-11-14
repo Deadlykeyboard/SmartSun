@@ -117,4 +117,4 @@ class display_controller():
             self.lcd_string(self.center_string(line_2_str), self._LCD_LINE_2)
 
         else:
-            print("Woh, that's to much to the good.")
+            print("Woh, that's to much of the good.")
