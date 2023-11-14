@@ -27,3 +27,4 @@ Error Reference Table:
     1. An error has occured while returning or after returning for sleep mode.
     2. An error has occured with the stepper for azimuth - outside domain.
     3. An error has occured with the stepper for elevation - outside domain.
+    4. An error has occured while checking the internet connection.

@@ -6,7 +6,10 @@ import base64
 import os
 import time
 import argparse
+import threading
 
+from Misc import LightController
+from Misc import EthernetInfo
 from Display import display_controller
 from SmartSunPos import SmartSunPos
 from SmartSun_GPIO_Controller import stepper_controller, StepperDomainError, StepperExecutionError
@@ -16,19 +19,23 @@ from Buzzer import buzzer_controller
 PINS_X_STEPPER = (17, 27, 22, 23)
 PINS_Y_STEPPER = (24, 5, 6, 16)
 BUZZER_PIN = (25)
+ERROR_LIGHT_PIN = (26)
 _termsize_ = 0
 
 x_stepper = stepper_controller(PINS_X_STEPPER, which='STX')
 y_stepper = stepper_controller(PINS_Y_STEPPER, which='STY')
 
+ether = EthernetInfo()
 disp = display_controller()
 buzz = buzzer_controller(pin=BUZZER_PIN)
+error_light = LightController(pin=ERROR_LIGHT_PIN)
 
 # Device & Software specific
 _version_ = 'ALPHA-0.10'
 _ntdevid_ = '012'
 _device_ = 'RPI-4'
 _unit_ = 'Dev unit'
+_ip_ = ether.MyIP
 
 # Locale settings
 location = (52.09061, 5.12143)
@@ -59,6 +66,7 @@ disp.cdprint(f'NTdev id: {_ntdevid_}', cline=2); time.sleep(1.5)
 disp.cdprint(f'Ver: {_version_}', cline=2); time.sleep(1.5)
 disp.cdprint(f'Device: {_device_}', cline=2); time.sleep(1.5)
 disp.cdprint(f'Unit: {_unit_}', cline=2); time.sleep(1.5)
+disp.cdprint(f'IP: {_ip_}', cline=2); time.sleep(1.5)
 
 buzz.continuous_buzz(True)
 if not args.silent: time.sleep(2)
@@ -66,6 +74,23 @@ buzz.continuous_buzz(False)
 if not args.silent: time.sleep(.5)
 buzz.single_beep()
 
+if not ether.CheckInternetAvailability():
+    buzz.error_beep()
+    disp.dprint("ERROR Ref No. 4")
+    time.sleep(2)
+    exit()
+
+
+error_blink = threading.Thread(target=error_light.blink())
+error_beep = threading.Thread(target=buzz.error_beep())
+def physical_error(state: bool):
+    if state:
+        error_blink.start()
+        error_beep.start()
+    else:
+        error_blink.join()
+        error_beep.join()
+    
 
 # Stepper system
 def update_steppers(x_angle: float, y_angle: float) -> bool:
@@ -82,7 +107,7 @@ def update_steppers(x_angle: float, y_angle: float) -> bool:
         except StepperDomainError:
             disp.dprint("ERROR Ref No. 3")
             print('An error has occured STY')
-            buzz.error_beep(2)
+            physical_error(True)
             time.sleep(2)
             pass
         
@@ -97,7 +122,7 @@ def update_steppers(x_angle: float, y_angle: float) -> bool:
         except StepperDomainError:
             disp.dprint("ERROR Ref. No. 2")
             print('An error has occured STX')
-            buzz.error_beep()
+            physical_error(True)
             time.sleep(2)
             pass
     
@@ -114,15 +139,17 @@ def update_steppers(x_angle: float, y_angle: float) -> bool:
         except:
             disp.dprint("ERROR Ref. No. 1")
             print("An error has occured while returning or after returning for sleep mode.")
-            buzz.error_beep()
+            physical_error(True)
             time.sleep(2)
             pass
 
-_man_time = (2023, 0, 0, 0, 0, 0, 0)
-_sys_time = True
-
+_sys_time = False # System time not set correctly.
 # Mainloop
 while True:
+    physical_error(False)
+    _time_by_ntp_ = ether.currenttime
+    _man_time = _time_by_ntp_ #(2023, 0, 0, 0, 0, 0, 0)
+    
     try:
         # in call ssp: man_time=(y, m, d, h, m, s, timezone)       
         obj = SmartSunPos(use_system_time=_sys_time, man_time=_man_time, return_time=True, location=location, timezone=timezone, refraction=True)
@@ -146,6 +173,8 @@ while True:
         time.sleep(30)
 
     except KeyboardInterrupt:
+        physical_error(False)
+
         disp.turn_off()
         buzz.GPIO_clearout()
 
