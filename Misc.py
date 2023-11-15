@@ -30,6 +30,8 @@ class EthernetInfo():
 class NTPtime():
     def __init__(self, timeserver: str = "pool.ntp.org"):
         self._timeserver = timeserver
+        self.DST_in_effect = self._dstActive()
+        self._last_saved_time = ()
         
     def getTimeFromServer(self):
             client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -44,15 +46,19 @@ class NTPtime():
                 ntp_response, server = client.recvfrom(48)
                 unpacked_response = struct.unpack("!12I", ntp_response)
                 seconds_since_1900 = unpacked_response[10] - 2208988800
+                self._last_saved_time = seconds_since_1900
                 return seconds_since_1900
             
-            except Exception as e:
-                return f"Error: {e}"
+            except Exception:
+                return self._last_saved_time
             
             finally:
                 client.close()
         
 
+    def dstActive(self):
+        time_struct = time.localtime(self.getTimeFromServer())
+        return dst_in_effect = True if time_struct.tm_isdst == 0 else False
 
     def FormattedNTPTime(self) -> tuple:
         time_struct = time.localtime(self.getTimeFromServer())

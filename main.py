@@ -164,8 +164,10 @@ _sys_time = False # System time often not set correctly.
 
 # Mainloop
 while True:
+    _adjust_timezone = False if ntptime.DST_in_effect else: True
     _time_by_ntp_ = ntptime.FormattedNTPTime()
     _man_time = _time_by_ntp_ #(2023, 0, 0, 0, 0, 0, 0)
+    timezone += 1 if _adjust_timezone
     
     try:
         # in call ssp: man_time=(y, m, d, h, m, s, timezone)       
