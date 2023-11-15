@@ -1,7 +1,6 @@
 # NTDEV - ID: 012
 # VERSION: ALPHA 0.1
 
-
 import RPi.GPIO as GPIO
 import time
 

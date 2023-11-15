@@ -92,21 +92,30 @@ if not args.fast:
 buzz.single_beep()
 
 error_blink = threading.Thread(target=error_light.blink)
-error_beep = threading.Thread(target=buzz.error_beep)
-_ThreadsActive = False
+error_beep = threading.Thread(target=buzz.continuous_error_beep)
 
-def physical_error(state: bool):
-    if state:
-        error_blink.start()
-        error_beep.start()
-        _threadIsActive = True
-        return
+def throw_physical_error(cancel: bool = False):
+    if not cancel:
+        try:
+            error_blink.start()
+            error_beep.start()
+            ThreadsActive = True
+        except KeyboardInterrupt:
+            return
+
+        except RuntimeError:
+                print("a thread error occured while starting up. (Maybe it was already running?)")
+    
     else:
-        if _ThreadsActive:
+        try:
             error_blink.join()
             error_beep.join()
-        return
-    
+        except KeyboardInterrupt:
+            return
+            
+        except RuntimeError:
+            print("a thread error occured while shutting down.")
+
 
 # Stepper system
 def update_steppers(x_angle: float, y_angle: float) -> bool:
@@ -123,7 +132,7 @@ def update_steppers(x_angle: float, y_angle: float) -> bool:
         except StepperDomainError:
             disp.dprint("ERROR Ref No. 3")
             print('An error has occured STY')
-            physical_error(True)
+            throw_physical_error()
             time.sleep(2)
             pass
         
@@ -138,7 +147,7 @@ def update_steppers(x_angle: float, y_angle: float) -> bool:
         except StepperDomainError:
             disp.dprint("ERROR Ref. No. 2")
             print('An error has occured STX')
-            physical_error(True)
+            throw_physical_error()
             time.sleep(2)
             pass
     
@@ -156,19 +165,17 @@ def update_steppers(x_angle: float, y_angle: float) -> bool:
         except:
             disp.dprint("ERROR Ref. No. 1")
             print("An error has occured while returning or after returning for sleep mode.")
-            physical_error(True)
+            throw_physical_error()
             time.sleep(2)
             pass
 
 _sys_time = False # System time often not set correctly.
-
+_adjust_timezone = False if ntptime.DST_in_effect else True
+_time_by_ntp_ = ntptime.FormattedNTPTime()
+_man_time = _time_by_ntp_ #(2023, 0, 0, 0, 0, 0, 0)
+timezone += 1 if _adjust_timezone else timezone
 # Mainloop
 while True:
-    _adjust_timezone = False if ntptime.DST_in_effect else: True
-    _time_by_ntp_ = ntptime.FormattedNTPTime()
-    _man_time = _time_by_ntp_ #(2023, 0, 0, 0, 0, 0, 0)
-    timezone += 1 if _adjust_timezone
-    
     try:
         # in call ssp: man_time=(y, m, d, h, m, s, timezone)       
         obj = SmartSunPos(use_system_time=_sys_time, man_time=_man_time, return_time=True, location=location, timezone=timezone, refraction=True)
@@ -192,7 +199,7 @@ while True:
         time.sleep(30)
 
     except KeyboardInterrupt:
-        physical_error(False)
+        throw_physical_error(cancel=True)
 
         disp.turn_off()
         buzz.GPIO_clearout()
