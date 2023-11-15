@@ -164,7 +164,7 @@ _sys_time = False # System time often not set correctly.
 
 # Mainloop
 while True:
-    _time_by_ntp_ = ntptime.CurrentFormattedTime
+    _time_by_ntp_ = ntptime.FormattedNTPTime()
     _man_time = _time_by_ntp_ #(2023, 0, 0, 0, 0, 0, 0)
     
     try:

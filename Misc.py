@@ -30,7 +30,6 @@ class EthernetInfo():
 class NTPtime():
     def __init__(self, timeserver: str = "pool.ntp.org"):
         self._timeserver = timeserver
-        self.CurrentFormattedTime = self._FormattedNTPTime()
         
     def getTimeFromServer(self):
             client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -55,7 +54,7 @@ class NTPtime():
         
 
 
-    def _FormattedNTPTime(self) -> tuple:
+    def FormattedNTPTime(self) -> tuple:
         time_struct = time.localtime(self.getTimeFromServer())
         year, month, day, hour, minute, second = time_struct[:6]
 
