@@ -74,10 +74,13 @@ class buzzer_controller():
             GPIO.output(self._pin, GPIO.HIGH)
             time.sleep(2)
             GPIO.output(self._pin, GPIO.LOW)
-            time.sleep(.1)
+            time.sleep(.2)
+            GPIO.output(self._pin, GPIO.HIGH)
+            time.sleep(.2)
+            GPIO.output(self._pin, GPIO.LOW)
+            time.sleep(1)
     
     def GPIO_clearout(self):
         self.notify_beep()
         GPIO.output(self._pin, GPIO.LOW)
         GPIO.cleanup()
-        self._pin = None

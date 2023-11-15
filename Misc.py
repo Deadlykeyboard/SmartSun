@@ -36,7 +36,6 @@ class NTPtime():
     def getTimeFromServer(self):
             client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             client.settimeout(5)
-        
             try:
                 serveraddress = socket.gethostbyname(self._timeserver)
                 ntp_req = bytearray(48)
