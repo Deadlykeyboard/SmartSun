@@ -15,7 +15,6 @@ from Display import display_controller
 from SmartSunPos import SmartSunPos
 from SmartSun_GPIO_Controller import stepper_controller, StepperDomainError, StepperExecutionError
 from Buzzer import buzzer_controller
-
 # Setup
 PINS_X_STEPPER = (17, 27, 22, 23)
 PINS_Y_STEPPER = (24, 5, 6, 16)
@@ -23,21 +22,33 @@ BUZZER_PIN = (25)
 ERROR_LIGHT_PIN = (26)
 _termsize_ = 0
 
-x_stepper = stepper_controller(PINS_X_STEPPER, which='STX')
-y_stepper = stepper_controller(PINS_Y_STEPPER, which='STY')
-
-ntptime = NTPtime()
-ether = EthernetInfo()
 disp = display_controller()
 buzz = buzzer_controller(pin=BUZZER_PIN)
 error_light = LightController(pin=ERROR_LIGHT_PIN)
+ether = EthernetInfo()
+
+# pre-start check
+while not ether.CheckInternetAvailability():
+    buzz.single_beep()
+    disp.cdprint('Waiting for:', cline=1)
+    disp.cdprint('Internet', cline=2)
+    time.sleep(1)
+
+disp.dprint('OK')
+time.sleep(1)
+
+x_stepper = stepper_controller(PINS_X_STEPPER, which='STX')
+y_stepper = stepper_controller(PINS_Y_STEPPER, which='STY')
+
+if ether.CheckInternetAvailability():
+    ntptime = NTPtime()
 
 # Device & Software specific
 _version_ = 'ALPHA-0.10'
 _ntdevid_ = '012'
 _device_ = 'RPI-4'
 _unit_ = 'Dev unit'
-_ip_ = ether.MyIP
+_ip_ = ether.MyIP()
 
 # Locale settings
 location = (52.09061, 5.12143)
@@ -58,7 +69,7 @@ if not args.cron:
     _termsize_ = os.get_terminal_size().columns
 
 # Boot screen
-disp.cdprint("PWS - STARTUP", cline=1)
+disp.cdprint("STARTING", cline=1)
 
 if not args.fast:
     for i in range(17):
@@ -77,25 +88,23 @@ if not args.fast:
     if not args.silent: time.sleep(2)
     buzz.continuous_buzz(False)
     if not args.silent: time.sleep(.5)
+
 buzz.single_beep()
-
-if not ether.CheckInternetAvailability():
-    buzz.error_beep()
-    disp.dprint("ERROR Ref No. 4")
-    time.sleep(2)
-    exit()
-
 
 error_blink = threading.Thread(target=error_light.blink)
 error_beep = threading.Thread(target=buzz.error_beep)
+_ThreadsActive = False
+
 def physical_error(state: bool):
     if state:
         error_blink.start()
         error_beep.start()
+        _threadIsActive = True
         return
     else:
-        error_blink.join()
-        error_beep.join()
+        if _ThreadsActive:
+            error_blink.join()
+            error_beep.join()
         return
     
 
@@ -185,7 +194,7 @@ while True:
 
         disp.turn_off()
         buzz.GPIO_clearout()
-        light.GPIO_clearout()
+        error_light.GPIO_clearout()
         
         x_stepper.GPIO_clearout()
         y_stepper.GPIO_clearout()

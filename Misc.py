@@ -8,7 +8,7 @@ import RPi.GPIO as GPIO
 
 class EthernetInfo():
     def __init__(self):
-        self.MyIP = self._getMyIp()
+        pass
 
     def CheckInternetAvailability(self) -> bool:
         try:
@@ -18,7 +18,7 @@ class EthernetInfo():
         except OSError:
             return False
     
-    def _getMyIp(self) -> str:
+    def MyIP(self) -> str:
         socket_instance = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         socket_instance.connect(("8.8.8.8", 80))
         local_ip_address = socket_instance.getsockname()[0]
