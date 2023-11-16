@@ -135,7 +135,8 @@ def update_steppers(x_angle: float, y_angle: float) -> bool:
             throw_physical_error()
             time.sleep(2)
             pass
-        
+
+        x_angle = (x_angle - 90) # zet loodrecht op zo'n.
         # Azimuth
         try:
             buzz.notify_beep()
