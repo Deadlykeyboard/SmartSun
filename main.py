@@ -9,6 +9,7 @@ import argparse
 import threading
 
 from LightController import LightController
+from Misc import GPIO_utils as gu
 from Misc import NTPtime
 from Misc import EthernetInfo
 from Display import display_controller
@@ -26,6 +27,8 @@ disp = display_controller()
 buzz = buzzer_controller(pin=BUZZER_PIN)
 error_light = LightController(pin=ERROR_LIGHT_PIN)
 ether = EthernetInfo()
+
+ADJUST_PERPENDICULAR_ANGLE = True
 
 # pre-start check
 while not ether.CheckInternetAvailability():
@@ -94,33 +97,22 @@ buzz.single_beep()
 error_blink = threading.Thread(target=error_light.blink)
 error_beep = threading.Thread(target=buzz.continuous_error_beep)
 
-def throw_physical_error(cancel: bool = False):
-    if not cancel:
-        try:
-            error_blink.start()
-            error_beep.start()
-            ThreadsActive = True
-        except KeyboardInterrupt:
-            return
+def throw_physical_error():
+    try:
+        error_blink.start()
+        error_beep.start()
+        ThreadsActive = True
+    except KeyboardInterrupt:
+        return
 
-        except RuntimeError:
-                print("a thread error occured while starting up. (Maybe it was already running?)")
-    
-    else:
-        try:
-            error_blink.join()
-            error_beep.join()
-        except KeyboardInterrupt:
-            return
-            
-        except RuntimeError:
-            print("a thread error occured while shutting down.")
+    except RuntimeError:
+            print("a thread error occured while starting up. (Maybe it was already running?)")
+
 
 
 # Stepper system
-def update_steppers(x_angle: float, y_angle: float) -> bool:
+def update_steppers(x_angle: float, y_angle: float):
     if not (y_angle <= 0):
-
         # Elevation
         y_angle = (90 - y_angle)
         try:
@@ -129,14 +121,19 @@ def update_steppers(x_angle: float, y_angle: float) -> bool:
             disp.cdprint("Please wait...", cline= 2)
             y_stepper.goto_specified(y_angle)
             time.sleep(1)
+            return
+
+        except KeyboardInterrupt:
+            graceful_shutdown()
+
         except StepperDomainError:
             disp.dprint("ERROR Ref No. 3")
             print('An error has occured STY')
             throw_physical_error()
             time.sleep(2)
-            pass
+            return
 
-        x_angle = (x_angle - 90) # zet loodrecht op zon.
+        x_angle = (x_angle - 90) if ADJUST_PERPENDICULAR_ANGLE else x_angle
         # Azimuth
         try:
             buzz.notify_beep()
@@ -144,13 +141,17 @@ def update_steppers(x_angle: float, y_angle: float) -> bool:
             disp.cdprint("Please wait...", cline= 2)
             x_stepper.goto_specified(x_angle)
             time.sleep(1)
-            return True
+            return
+
+        except KeyboardInterrupt:
+            graceful_shutdown()
+
         except StepperDomainError:
             disp.dprint("ERROR Ref. No. 2")
             print('An error has occured STX')
             throw_physical_error()
             time.sleep(2)
-            pass
+            return
     
         # If the sun's under, elev < 0
     else:
@@ -163,12 +164,52 @@ def update_steppers(x_angle: float, y_angle: float) -> bool:
             y_stepper.return_default()
             disp.cdprint("Device standby..", cline=2)
             time.sleep(1800) # check up with an interval of half an hour 60 * 30 = 1800
+            return
+
+        except KeyboardInterrupt:
+            graceful_shutdown()
+
         except:
             disp.dprint("ERROR Ref. No. 1")
             print("An error has occured while returning or after returning for sleep mode.")
             throw_physical_error()
             time.sleep(2)
+            return
+        
+        
+
+
+def graceful_shutdown():
+    try:
+        print("\n[SHUTDOWN] Starting Process")    
+        try:
+            print("[SHUTDOWN] Stopping threads")
+            error_blink.join()
+            error_beep.join()
+        
+        except Exception:
             pass
+            
+        try:
+            print("[SHUTDOWN] Cleaning up GPIO module ")
+            disp.turn_off()
+            buzz.GPIO_clearout()
+            error_light.GPIO_clearout()
+            x_stepper.GPIO_clearout()
+            y_stepper.GPIO_clearout()
+            p = gu()
+            p.global_clearout() # eig compleet NIET nodig...
+        
+        except Exception:
+            pass
+    
+    except Exception as e:
+        print(f"The 'graceful-shutdown-function' encountered a error:\n{e}")
+
+    finally:
+        print("[SHUTDOWN] Exitting...")
+        exit()
+
 
 _sys_time = False # System time often not set correctly.
 _adjust_timezone = False if ntptime.DST_in_effect else True
@@ -200,12 +241,4 @@ while True:
         time.sleep(30)
 
     except KeyboardInterrupt:
-        throw_physical_error(cancel=True)
-
-        disp.turn_off()
-        buzz.GPIO_clearout()
-        error_light.GPIO_clearout()
-        
-        x_stepper.GPIO_clearout()
-        y_stepper.GPIO_clearout()
-        exit()
+        graceful_shutdown()

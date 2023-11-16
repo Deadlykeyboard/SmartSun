@@ -26,12 +26,20 @@ class EthernetInfo():
         return local_ip_address
 
 
+class GPIO_utils():
+    def __init__(self):
+        pass
+    
+    def global_clearout(self):
+        GPIO.cleanup()
+        return
+
 
 class NTPtime():
     def __init__(self, timeserver: str = "pool.ntp.org"):
         self._timeserver = timeserver
         self.DST_in_effect = self._dstActive()
-        self._last_saved_time = ()
+        self._last_saved_time = (0)
         
     def getTimeFromServer(self):
             client = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
