@@ -67,18 +67,19 @@ class buzzer_controller():
             GPIO.output(self._pin, GPIO.LOW)
             time.sleep(.1)
     
-    def continuous_error_beep(self):
+    def continuous_error_beep(self, state: bool = True):
         if not self._isactive:
             return
-        while True:
-            GPIO.output(self._pin, GPIO.HIGH)
-            time.sleep(2)
-            GPIO.output(self._pin, GPIO.LOW)
-            time.sleep(.2)
-            GPIO.output(self._pin, GPIO.HIGH)
-            time.sleep(.2)
-            GPIO.output(self._pin, GPIO.LOW)
-            time.sleep(1)
+        if state:
+            while True:
+                GPIO.output(self._pin, GPIO.HIGH)
+                time.sleep(2)
+                GPIO.output(self._pin, GPIO.LOW)
+                time.sleep(.2)
+                GPIO.output(self._pin, GPIO.HIGH)
+                time.sleep(.2)
+                GPIO.output(self._pin, GPIO.LOW)
+                time.sleep(1)
     
     def GPIO_clearout(self):
         self.notify_beep()
