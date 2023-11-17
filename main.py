@@ -121,7 +121,6 @@ def update_steppers(x_angle: float, y_angle: float):
             disp.cdprint("Please wait...", cline= 2)
             y_stepper.goto_specified(y_angle)
             time.sleep(1)
-            return
 
         except KeyboardInterrupt:
             graceful_shutdown()
@@ -141,8 +140,7 @@ def update_steppers(x_angle: float, y_angle: float):
             disp.cdprint("Please wait...", cline= 2)
             x_stepper.goto_specified(x_angle)
             time.sleep(1)
-            return
-
+            
         except KeyboardInterrupt:
             graceful_shutdown()
 
