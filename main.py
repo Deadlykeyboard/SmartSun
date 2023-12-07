@@ -213,7 +213,7 @@ _sys_time = False # System time often not set correctly.
 _adjust_timezone = False if ntptime.DST_in_effect else True
 _time_by_ntp_ = ntptime.FormattedNTPTime()
 _man_time = _time_by_ntp_ #(2023, 0, 0, 0, 0, 0, 0)
-timezone += 1 if _adjust_timezone else 0
+timezone -= 1 if _adjust_timezone else 0
 # Mainloop
 while True:
     try:
