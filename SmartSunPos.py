@@ -1,5 +1,7 @@
 # NTDEV - ID: 012
 # VERSION: ALPHA 0.1
+# This file is updated independently, it does not concern the global version of the controller.
+
 
 # Imports
 import math
@@ -8,29 +10,44 @@ import datetime
 # Class
 class SmartSunPos():
 	def __init__(self, use_system_time: bool = True, man_time: tuple = (0, 0, 0, 0, 0, 0, 0), return_time: bool = True, location: tuple = None, timezone: int = None, refraction: bool = True):
-		tz, location = self.set_default(timezone, location)
-		if use_system_time == True:
-			current_time = self.current_time(timezone)
+		self._timezone = self.set_timezone(timezone)
+		self._location = self.set_location(location)
+		self._man_time = man_time
+		if use_system_time:
+			current_time = self.current_time()
 		else:
-			current_time = man_time
-		self.data = self.get_data(current_time, location, tz, refraction)
-		self.sun_position = self.sunpos(current_time, location, refraction, return_time)
+			current_time = self.man_time
+		self.data = self.get_data(current_time, self.location, refraction)
+		self.sun_position = self.sunpos(current_time, self.location, refraction, return_time)
 
-	def set_default(self, tz, location):
-		# If the user did not manipulate any data, the deafault (NE) will be set.
-		# Loads standards for the netherlands
-		if tz == None: tz == 2
-		if location == None: location ==  (52.1, 5.1)
-		return tz, location
+	@property
+	def man_time(self):
+		man_time = list(self._man_time)
+		man_time[6] = self.timezone
+		return tuple(man_time)
+	
+	@property
+	def timezone(self):
+		return self._timezone
+	
+	@property
+	def location(self):
+		return self._location
 
-	def get_data(self, current_time, location, tz, refraction):
-		return {'refraction':refraction, 'current_time':current_time, 'location':location, 'timezone':tz, }
+	def set_timezone(self, timezone):
+		return 2 if timezone == None else timezone
+	
+	def set_location(self, location):
+		return (52, 5) if location == None else location
+
+	def get_data(self, current_time, location, refraction):
+		return {'refraction':refraction, 'cucrrent_time':current_time, 'location':location, 'timezone':self.timezone}
 
 
-	def current_time(self, tz):
+	def current_time(self):
 		curr_time = datetime.datetime.today().timetuple()
 		year, mon, day, hr, mins, secs = curr_time.tm_year, curr_time.tm_mon, curr_time.tm_mday, curr_time.tm_hour, curr_time.tm_min, curr_time.tm_sec
-		time_zone = tz
+		time_zone = self.timezone
 		return (year, mon, day, hr, mins, secs, time_zone)
 
 	
