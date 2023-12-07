@@ -224,6 +224,7 @@ while True:
         #---DESKTOP---#
         if args.terminal:
             print("-" * _termsize_)
+            print(f"Daylight saving time: {ntptime.DST_in_effect}")
             print(f"Last measurement: {obj.data}")
             print(f"Current azimuth: {azimuth} degrees\nCurrent elevation: {elevation} degrees")
             print("-" * _termsize_)
