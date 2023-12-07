@@ -65,7 +65,7 @@ class NTPtime():
 
     def _dstActive(self):
         time_struct = time.localtime(self.getTimeFromServer())
-        dst_in_effect = True if time_struct.tm_isdst == 0 else False
+        dst_in_effect = True if time_struct.tm_isdst == 1 else False
         return dst_in_effect
 
     def FormattedNTPTime(self) -> tuple:
