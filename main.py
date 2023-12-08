@@ -16,6 +16,8 @@ from Display import display_controller
 from SmartSunPos import SmartSunPos
 from SmartSun_GPIO_Controller import stepper_controller, StepperDomainError, StepperExecutionError
 from Buzzer import buzzer_controller
+
+
 # Setup
 PINS_X_STEPPER = (17, 27, 22, 23)
 PINS_Y_STEPPER = (24, 5, 6, 16)
@@ -101,7 +103,6 @@ def throw_physical_error():
     try:
         error_blink.start()
         error_beep.start()
-        ThreadsActive = True
     except KeyboardInterrupt:
         return
 
