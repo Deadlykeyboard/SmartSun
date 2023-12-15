@@ -210,13 +210,14 @@ def graceful_shutdown():
         exit()
 
 
-_sys_time = False # System time often not set correctly.
-_adjust_timezone = False if ntptime.DST_in_effect else True
-_time_by_ntp_ = ntptime.FormattedNTPTime()
-_man_time = _time_by_ntp_ #(2023, 0, 0, 0, 0, 0, 0)
-timezone -= 1 if _adjust_timezone else 0
 # Mainloop
 while True:
+    _sys_time = False # System time often not set correctly.
+    _adjust_timezone = False if ntptime.DST_in_effect else True
+    _time_by_ntp_ = ntptime.FormattedNTPTime()
+    _man_time = _time_by_ntp_ #(2023, 0, 0, 0, 0, 0, 0)
+    timezone -= 1 if _adjust_timezone else 0
+    
     try:
         # in call ssp: man_time=(y, m, d, h, m, s, timezone)       
         obj = SmartSunPos(use_system_time=_sys_time, man_time=_man_time, return_time=True, location=location, timezone=timezone, refraction=True)
